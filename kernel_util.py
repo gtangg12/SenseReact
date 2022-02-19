@@ -21,9 +21,10 @@ def get_response_text(response):
     return response['choices'][0]['text']
 
 
+from drivers.console.console import ConsoleDriver
 from drivers.perception.perception import PerceptionDriver
 
 drivers = {
-    'console_print':
+    'console': ConsoleDriver,
     'perception': PerceptionDriver
 }

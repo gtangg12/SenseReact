@@ -5,6 +5,8 @@ logic:
 
 setup:
     sync_driver('perception')
-    visual_desc = exec_driver('perception', 'read')
-    output = logic('scenario description', visual_desc)
-    
+    sync_driver('console')
+
+    input = exec_driver('perception', 'read')
+    output = exec_logic('scenario description', input)
+    exec_driver('console', 'print')

@@ -6,14 +6,14 @@ N Programming Language
 
 class Program:
     def __init__(self, filename):
-        self.compile(filename)
+        self.compile(f'programs/{filename}.n')
         self.drivers = []
 
     def compile(self, filename):
         with open(filename, 'r') as fin:
             lines = fin.readlines().split('\n')
         for line in lines:
-            eval(f'self.{line.strip('\n')}')
+            print(line)
 
     def execute(self, prompt):
         pass
