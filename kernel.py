@@ -1,9 +1,10 @@
-from pl import Program
+import argparse
+from process import Program, running_program
 
 
 def main():
-    program = Program('detect_fight')
-    program.execute()
+    running_program = Program('detect_fight')
+    execute()
 
 
 if __name__ == '__main__':

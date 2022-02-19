@@ -21,6 +21,6 @@ setup:
 
 
 loop:
-    inp = exec_driver('perception', 'next')
-    out = exec_logic('respond', inp)
-    exec_driver('console', 'print')
+    store('inp', exec_driver('perception', 'next'))
+    store('out', exec_logic('respond', load('inp')))
+    exec_driver('console', 'print', load('out'))

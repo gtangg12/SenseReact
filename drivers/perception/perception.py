@@ -1,6 +1,7 @@
 """
-    Driver for translating raw video into captions
+    Driver for translating video into captions
 """
+
 import sys
 import re
 import argparse
