@@ -1,12 +1,12 @@
 import torch
-import clip
+from CLIP import clip
 from PIL import Image
 from tqdm import tqdm
 import numpy as np
 
 model, preprocess = clip.load("ViT-L/14", device='cuda')
 
-img_path = lambda i: f'imgs_sample/frame_{i}.jpg'
+img_path = lambda i: f'/nobackup/users/wzhao6/treehacks2022/imgs_sample/frame_{i}.jpg'
 device = 'cuda'
 n_imgs = 4263
 caption_every = 10
@@ -21,6 +21,7 @@ with torch.no_grad():
     img_tokens = []
     for i in range(0, n_imgs, 10):
         img_tokens.append(preprocess(Image.open(img_path(i))))
+        print('image preprocess', i)
 
     img_embeds = []
     for batch_idx in tqdm(range(n_imgs//(16*10))):
