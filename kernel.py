@@ -1,4 +1,10 @@
-import os
-import openai
+from drivers.perception import PerceptionDriver
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+
+def main():
+    program = Program('detect_fight')
+    program.execute()
+
+
+if __name__ == '__main__':
+    main()
