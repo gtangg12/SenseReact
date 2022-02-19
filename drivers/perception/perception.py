@@ -12,10 +12,10 @@ from kernel_util import *
 
 import argparse
 import time
-from torch
 import numpy as np
 import cv2
 from CLIP import clip
+from torch import functional as F
 
 READ_EVERY = 5
 CAPTION_AFTER_FRAMES = 10
@@ -173,7 +173,7 @@ def main():
             elif last_segment_length > MAX_CHUNK_FRAMES:
                 begin_new_chunk = True
             else:
-                similarity = clip.cosine_similarity(last_segment_caption_embedding, embedding)
+                similarity = F.cosing_similarity(last_segment_caption_embedding, embedding)
                 if similarity < NEW_CHUNK_SIMILARITY_THRESHOLD:
                     begin_new_chunk = False
                     last_segment_length += READ_EVERY
