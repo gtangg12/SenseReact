@@ -24,3 +24,11 @@ Do your work here
 Open a paid openai account at https://beta.openai.com/
 
 Follow the instructions at https://beta.openai.com/docs/api-reference/
+
+## CLIP
+To install clip, follow the instructions on their github
+```
+conda install --yes -c pytorch pytorch=1.7.1 torchvision
+pip install ftfy regex tqdm
+pip install git+https://github.com/openai/CLIP.git
+```
