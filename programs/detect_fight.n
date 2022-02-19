@@ -1,12 +1,26 @@
 logic:
-    Given the scenario description, what should I do given the instructions?
 
-    Instructions: If people are fighting, say "If you don't stop, I will call the police!".
+respond:
+    The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.
+
+    Given the scenario description, the assistant will do as the instructions say.
+
+    Instructions:
+
+    1) If people are fighting, say "If you don't stop, I will call the police!".
+    2) If one side is hurt, say "I am calling 911!".
+    3) If one side is dying, say "Someone get an AED. Someone start CPR! Someone pray healthcare is cheap!".
+    4) You can say possibly many things at once.
+
+fuse:
+
+
 
 setup:
-    sync_driver('perception')
-    sync_driver('console')
+    set_frequency(10)
 
-    inp = exec_driver('perception', 'read')
-    out = exec_logic('scenario description', inp)
+
+loop:
+    inp = exec_driver('perception', 'next')
+    out = exec_logic('respond', inp)
     exec_driver('console', 'print')
