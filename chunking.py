@@ -16,7 +16,7 @@ def chunk(frame_embeds):
     parents = np.zeros(n_frames+1, dtype=np.int)
     for i in range(1, n_frames +1):
         possible_costs = [
-            CHUNK_PENALTY + costs[j] + (i-j)*torch.var(frame_embeds[j:i], axis=0).mean() for j in range(i-1)
+            CHUNK_PENALTY + costs[j] + (i-j)*torch.var(frame_embeds[j:i], axis=0).mean() for j in range(max(i-60, 0), i-1)
         ]
         possible_costs.extend([CHUNK_PENALTY + costs[i-1]]) # since torch.var doesn't work for singleton chunks
         
