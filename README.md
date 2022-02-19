@@ -8,7 +8,7 @@ Login:
 ssh [kerb]@satori-login-002.mit.edu
 ```
 
-Setup the conda environment
+Setup conda environment
 
 Running an interactive process:
 ```
@@ -19,3 +19,8 @@ Do your work here
 ```
 /nobackup/users/[kerb]
 ```
+
+## OpenAI
+Open a paid openai account at https://beta.openai.com/
+
+Follow the instructions at https://beta.openai.com/docs/api-reference/
