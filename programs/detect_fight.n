@@ -1,0 +1,12 @@
+logic:
+    Given the scenario description, what should I do given the instructions?
+
+    Instructions: If people are fighting, say "If you don't stop, I will call the police!".
+
+setup:
+    sync_driver('perception')
+    sync_driver('console')
+
+    inp = exec_driver('perception', 'read')
+    out = exec_logic('scenario description', inp)
+    exec_driver('console', 'print')

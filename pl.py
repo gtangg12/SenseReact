@@ -1,32 +1,32 @@
+from kernel_util import drivers
+
 """
 N Programming Language
 """
 
-    def add_driver(self, driver):
-        pass
-
-    def add_goal(self, goal):
-        pass
-
-    def add_rule(self, rule):
-        pass
-
-    def load(self, query):
-        pass
-
-    def store(self, query):
-        pass
-
-
 class Program:
     def __init__(self, filename):
-        self.compile(filename)
+        self.compile(f'programs/{filename}.n')
+        self.drivers = []
 
     def compile(self, filename):
         with open(filename, 'r') as fin:
             lines = fin.readlines().split('\n')
         for line in lines:
-            eval(line.strip('\n'))
+            print(line)
 
     def execute(self, prompt):
+        pass
+
+    def sync_driver(self, driver):
+        self.drivers.append()
+
+    def exec_driver(self, driver, method):
+        pass
+
+
+    def load(self, query):
+        pass
+
+    def store(self, query):
         pass
