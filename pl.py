@@ -24,11 +24,6 @@ class Program:
     def exec_driver(self, driver, method):
         pass
 
-    def add_goal(self, goal):
-        pass
-
-    def add_rule(self, rule):
-        pass
 
     def load(self, query):
         pass

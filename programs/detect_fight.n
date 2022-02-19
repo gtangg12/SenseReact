@@ -1,7 +1,10 @@
-setup:
-    add_goal("Given the input description, what should I do given the instructions?")
-    add_rule("Instructions: If people are fighting, say \"If you don't stop, I will call the police!\".")
-    sync_driver('perception')
+logic:
+    Given the scenario description, what should I do given the instructions?
 
-loop:
-    exec_driver('perception', 'read')
+    Instructions: If people are fighting, say \"If you don't stop, I will call the police!\".
+
+setup:
+    sync_driver('perception')
+    visual_desc = exec_driver('perception', 'read')
+    output = logic('scenario description', visual_desc)
+    

@@ -13,6 +13,9 @@ from kernel_util import *
 class PerceptionDriver:
     buffer = Queue()
 
+    def __init__(self):
+        pass
+
     def next():
         return buffer.get(block=True)
 

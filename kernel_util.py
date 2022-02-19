@@ -24,5 +24,6 @@ def get_response_text(response):
 from drivers.perception.perception import PerceptionDriver
 
 drivers = {
+    'console_print':
     'perception': PerceptionDriver
 }
