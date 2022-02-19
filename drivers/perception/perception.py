@@ -1,71 +1,84 @@
 """
-Translate input video into captions
+    Driver for translating video into captions
 """
+
 import sys
 import re
-import torch
-import torch.nn as nn
-from queue import Queue
-
-sys.path.append('../../')
-from kernel_util import *
-
 import argparse
 import time
 import numpy as np
 import cv2
-from CLIP import clip
-from torch import functional as F
+import torch
+import torch.nn as nn
+from queue import Queue
+from drivers.perception.CLIP import clip
+from transformers import GPT2Tokenizer
+sys.path.append('../../')
+from kernel_util import *
+from PIL import Image
+from drivers.perception.MappingNet.model import ClipCaptionPrefix
+from drivers.perception.MappingNet.search import generate_beam
+
+
+class PerceptionDriver:
+    buffer = Queue()
+
+    @classmethod
+    def push(cls, caption):
+        PerceptionDriver.buffer.put(caption)
+
+    @classmethod
+    def next(cls):
+        return 'tmp'
+        #return PerceptionDriver.buffer.get(block=True)
+
+    @classmethod
+    def reset(cls):
+        PerceptionDriver.buffer = Queue()
+
 
 READ_EVERY = 5
 CAPTION_AFTER_FRAMES = 10
 MAX_CHUNK_FRAMES = 300
 DRIFT_SIMILARITY_THRESHOLD = 0.5
 NEW_CHUNK_SIMILARITY_THRESHOLD = 0.5
-
-clip_model, clip_preprocess = clip.load("ViT-L/14", device='cuda')
-
-class PerceptionDriver:
-    buffer = Queue()
-
-    def __init__(self):
-        pass
-
-    @classmethod
-    def push(cls, caption):
-        buffer.put(caption)
-
-    @classmethod
-    def next(cls):
-        return buffer.get(block=True)
-
-    @classmethod
-    def reset(cls):
-        buffer = Queue()
+UNPROMPT_PREFIX_LENGTH = 40
+device='cuda'
 
 
 captions = ['The man is having a picnic in the park with his dog.']
+clip_model, clip_preprocess = None, None
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description='Recording settings.')
+clip_model_unprompt, clip_preprocess_unprompt = None, None
+tokenizer_unprompt = None
+mapping_net_unprompt = None
 
-    parser.add_argument('-o', '--output_path', default='output.mp4', type=str,
-        help='')
-    parser.add_argument('-n', '--num_frames', default=2000, type=int,
-        help='')
-    parser.add_argument('--fps', default=24, type=int,
-        help='')
+def load_clip():
+    global clip_model, clip_preprocess
+    clip_model, clip_preprocess = clip.load("ViT-L/14", device=device)
 
-    return parser.parse_args()
+def load_unprompt():
+    global tokenizer_unprompt, mapping_net_unprompt, clip_model_unprompt, clip_preprocess_unprompt
+    tokenizer_unprompt = GPT2Tokenizer.from_pretrained("gpt2")
+    clip_model_unprompt, clip_preprocess_unprompt = clip.load("RN50x4", device=device, jit=False)
+    
+    model_path = './MappingNet/pretrained_models/model_wieghts.pt'
+    mapping_net_unprompt = ClipCaptionPrefix(UNPROMPT_PREFIX_LENGTH, clip_length=40, prefix_size=640,
+                                    num_layers=8, mapping_type='transformer')
+    mapping_net_unprompt.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+    mapping_net_unprompt.eval().to(device)
+
 
 def embed_texts(texts):
     return clip_model.encode_text(texts)
+
 
 def embed_frame(frame):
     tokens = clip_preprocess(frame)
     embeddings = clip_model.encode_image(tokens)
     return embeddings
+
 
 def embed_compare_func(clip_embedding):
     cosine_sim = nn.CosineSimilarity(dim=0)
@@ -73,6 +86,7 @@ def embed_compare_func(clip_embedding):
     def embed_compare(embedding):
         return cosine_sim(clip_embedding, embedding)
     return embed_compare
+
 
 def next_caption(clip_embedding):
     """ """
@@ -118,14 +132,39 @@ def next_caption(clip_embedding):
     topidx = torch.argmax(scores).item()
     return candidates[topidx], scores[topidx]
 
-def get_google_caption(embeds):
-    
+
+def get_google_caption(frame):
+    image = Image.fromarray(frame)
+    image = clip_preprocess_unprompt(image).unsqueeze(0).to(device)
+    with torch.no_grad():
+        prefix = clip_model_unprompt.encode_image(image).to(device, dtype=torch.float32)
+        prefix = prefix / prefix.norm(2, -1).item()
+        prefix_embed = mapping_net_unprompt.clip_project(prefix).reshape(1, UNPROMPT_PREFIX_LENGTH, -1)
+    generated_text_prefix = generate_beam(mapping_net_unprompt, tokenizer_unprompt, embed=prefix_embed)[0]
+
+    return generated_text_prefix
+
+
 
 def clean_caption():
     pass
 
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Recording settings.')
+
+    parser.add_argument('-o', '--output_path', default='output.mp4', type=str,
+        help='')
+    parser.add_argument('-n', '--num_frames', default=2000, type=int,
+        help='')
+    parser.add_argument('--fps', default=24, type=int,
+        help='')
+
+    return parser.parse_args()
+
 def main():
     args = parse_args()
+    load_clip()
 
     video_cap = cv2.VideoCapture(0)
     cap_prop = lambda x : int(video_cap.get(x))
@@ -153,7 +192,7 @@ def main():
         """
         Assume we're not currently beginning a new chunk.
         We read a frame every READ_EVERY frames, and compute its embedding.
-        If its similarity to the last segment's caption is too low, or if 
+        If its similarity to the last segment's caption is too low, or if
         the last segment has lasted at least MAX_CHUNK_FRAMES, we start a new chunk.
         """
 
@@ -191,21 +230,21 @@ def main():
             new_chunk_length += 1
             new_chunk_tokens.append(embed_frame(frame))
             if new_chunk_length >= CAPTION_AFTER_FRAMES:
-                batch = torch.stack(new_chunk_tokens).to('cuda')
+                batch = torch.stack(new_chunk_tokens).to(device)
                 embeds = clip_model.encode_image(batch)
                 embeds = torch.mean(embeds, dim=0)
 
-                if last_segment_caption_embedding is not None:                    
+                if last_segment_caption_embedding is not None:
                     # Get the most similar caption using Bayesian factorization
                     suggested_caption, similarity = next_caption(embeds)
-                    
+
                     if similarity > DRIFT_SIMILARITY_THRESHOLD:
                         caption = suggested_caption
                     else:
-                        caption = get_google_caption(embeds)
+                        caption = get_google_caption(frame)
 
                 else:
-                    caption = get_google_caption(embeds)
+                    caption = get_google_caption(frame)
 
                 begin_new_chunk = False
                 new_chunk_length = 0
