@@ -15,3 +15,14 @@ Usage:
 models = {
     'text_completion': openai.Completion,
 }
+
+
+def get_response_text(response):
+    return response['choices'][0]['text']
+
+
+from drivers.perception.perception import PerceptionDriver
+
+drivers = {
+    'perception': PerceptionDriver
+}

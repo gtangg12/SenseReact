@@ -5,8 +5,9 @@ import sys
 sys.path.append('../')
 
 import re
+import torch
 from queue import Queue
-from kernel_util import models
+from kernel_util import *
 
 
 class PerceptionDriver:
@@ -25,23 +26,38 @@ captions = ['The man is having a picnic in the park with his dog.']
 def embed_text(text):
     pass
 
+
+def embed_compare_func(clip_embedding):
+    cosine_sim = nn.CosineSimilarity(dim=1, eps=1e-6)
+
+    def embed_compare(embedding):
+        return cosine_sim(clip_embedding, embedding)
+
+    return embed_compare
+
+
 def next_caption(clip_embedding):
     """ """
-    get_text : lambda response : response['choices'][0]['text']
+    assert len(captions), "Cannot call next caption until captions seeded"
 
-    NUM_PREV = 10
-    events = ' '.join(captions[-NUM_PREV:])
+    N_PREV_CAPTIONS = 10
+    events = ' '.join(captions[-N_PREV_CAPTIONS:])
     prompt = f'{events} List 20 events that will likely happen next.'
 
     response = models['text_completion'].create(engine='text-davinci-001',
                                                 prompt=prompt,
                                                 temperature=0.3,
                                                 max_tokens=512)
-    text = get_text(response)
+    text = get_response_text(response)
     candidates = re.split(r'\n[0-9]+. ', text)
-    candidates[0] = candidates[-1]
+    candidates[0] = captions[-1]
     embeddings = [embed_text(x) for x in candidates]
 
+    clip_embedding_sim = embed_compare_func(clip_embedding)
+    scores = map(clip_embedding_sim, embeddings)
+    scores = torch.stack(list(scores))
+    best_caption = candidates[torch.argmax(scores).item()]
+    return best_caption
 
 
 def clean_caption():

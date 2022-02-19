@@ -1,0 +1,7 @@
+setup:
+    add_goal("Given the input description, what should I do given the instructions?")
+    add_rule("Instructions: If people are fighting, say \"If you don't stop, I will call the police!\".")
+    sync_driver('perception')
+
+loop:
+    exec_driver('perception', 'read')
