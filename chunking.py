@@ -1,6 +1,6 @@
 import numpy as np
 
-CHUNK_PENALTY = 10.0
+CHUNK_PENALTY = 10
 
 def chunk(frame_embeds):
     """
@@ -16,7 +16,7 @@ def chunk(frame_embeds):
     parents = np.zeros(n_frames+1, dtype=np.int)
     for i in range(1, n_frames +1):
         possible_costs = [
-            CHUNK_PENALTY + costs[j] + torch.var(frame_embeds[j:i], axis=0).mean() for j in range(i-1)
+            CHUNK_PENALTY + costs[j] + (i-j)*torch.var(frame_embeds[j:i], axis=0).mean() for j in range(i-1)
         ]
         possible_costs.extend([CHUNK_PENALTY + costs[i-1]]) # since torch.var doesn't work for singleton chunks
         
@@ -49,6 +49,12 @@ if __name__ == "__main__":
         [10, 15, 14],
         [10, 15, 14],
     ], dtype=torch.float)
+
+    frame_embeds = torch.tile(frame_embeds, (4, 1))
+    print(frame_embeds)
+
+    frame_embeds += torch.rand_like(frame_embeds) * 5
+    print(torch.var(frame_embeds, axis=0).mean())
 
     chunks = chunk(frame_embeds)
 
