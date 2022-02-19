@@ -47,6 +47,7 @@ class Program:
         while True:
             states = {}
             for line in self.loop:
+                print(line)
                 if '=' in line:
                     var, value = [x.strip(' ') for x in line.split('=')]
                     if value in states:
@@ -56,6 +57,8 @@ class Program:
                     states[var] = value
                 else:
                     eval(f'self.{value}')
+            print("AKJSDF")
+            print(states)
             while (time.time() - timer < 1.0 / self.frequency):
                 pass
             timer = time.time()

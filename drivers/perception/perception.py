@@ -18,20 +18,18 @@ from kernel_util import *
 class PerceptionDriver:
     buffer = Queue()
 
-    def __init__(self):
-        pass
-
     @classmethod
     def push(cls, caption):
-        buffer.put(caption)
+        PerceptionDriver.buffer.put(caption)
 
     @classmethod
     def next(cls):
-        return buffer.get(block=True)
+        return 'tmp'
+        #return PerceptionDriver.buffer.get(block=True)
 
     @classmethod
     def reset(cls):
-        buffer = Queue()
+        PerceptionDriver.buffer = Queue()
 
 
 READ_EVERY = 5
@@ -134,6 +132,7 @@ def parse_args():
 
 def main():
     args = parse_args()
+    load_clip()
 
     video_cap = cv2.VideoCapture(0)
     cap_prop = lambda x : int(video_cap.get(x))
