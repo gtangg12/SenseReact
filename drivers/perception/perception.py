@@ -11,9 +11,13 @@ import cv2
 import torch
 import torch.nn as nn
 from queue import Queue
-from drivers.perception.clip import clip
+from drivers.perception.CLIP import clip
+from transformers import GPT2Tokenizer
 sys.path.append('../../')
 from kernel_util import *
+from PIL import Image
+from drivers.perception.MappingNet.model import ClipCaptionPrefix
+from drivers.perception.MappingNet.search import generate_beam
 
 
 class PerceptionDriver:
@@ -37,14 +41,32 @@ CAPTION_AFTER_FRAMES = 10
 MAX_CHUNK_FRAMES = 300
 DRIFT_SIMILARITY_THRESHOLD = 0.5
 NEW_CHUNK_SIMILARITY_THRESHOLD = 0.5
+UNPROMPT_PREFIX_LENGTH = 40
+device='cuda'
 
 
 captions = ['The man is having a picnic in the park with his dog.']
 clip_model, clip_preprocess = None, None
 
 
+clip_model_unprompt, clip_preprocess_unprompt = None, None
+tokenizer_unprompt = None
+mapping_net_unprompt = None
+
 def load_clip():
-    clip_model, clip_preprocess = clip.load("ViT-L/14", device='cuda')
+    global clip_model, clip_preprocess
+    clip_model, clip_preprocess = clip.load("ViT-L/14", device=device)
+
+def load_unprompt():
+    global tokenizer_unprompt, mapping_net_unprompt, clip_model_unprompt, clip_preprocess_unprompt
+    tokenizer_unprompt = GPT2Tokenizer.from_pretrained("gpt2")
+    clip_model_unprompt, clip_preprocess_unprompt = clip.load("RN50x4", device=device, jit=False)
+    
+    model_path = './MappingNet/pretrained_models/model_wieghts.pt'
+    mapping_net_unprompt = ClipCaptionPrefix(UNPROMPT_PREFIX_LENGTH, clip_length=40, prefix_size=640,
+                                    num_layers=8, mapping_type='transformer')
+    mapping_net_unprompt.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+    mapping_net_unprompt.eval().to(device)
 
 
 def embed_texts(texts):
@@ -110,8 +132,17 @@ def next_caption(clip_embedding):
     return candidates[topidx], scores[topidx]
 
 
-def get_google_caption(embeds):
-    pass
+def get_google_caption(frame):
+    image = Image.fromarray(frame)
+    image = clip_preprocess_unprompt(image).unsqueeze(0).to(device)
+    with torch.no_grad():
+        prefix = clip_model_unprompt.encode_image(image).to(device, dtype=torch.float32)
+        prefix = prefix / prefix.norm(2, -1).item()
+        prefix_embed = mapping_net_unprompt.clip_project(prefix).reshape(1, UNPROMPT_PREFIX_LENGTH, -1)
+    generated_text_prefix = generate_beam(mapping_net_unprompt, tokenizer_unprompt, embed=prefix_embed)[0]
+
+    return generated_text_prefix
+
 
 
 def clean_caption():
@@ -180,7 +211,7 @@ def main():
             elif last_segment_length > MAX_CHUNK_FRAMES:
                 begin_new_chunk = True
             else:
-                similarity = clip.cosine_similarity(last_segment_caption_embedding, embedding)
+                similarity = F.cosing_similarity(last_segment_caption_embedding, embedding)
                 if similarity < NEW_CHUNK_SIMILARITY_THRESHOLD:
                     begin_new_chunk = False
                     last_segment_length += READ_EVERY
@@ -198,7 +229,7 @@ def main():
             new_chunk_length += 1
             new_chunk_tokens.append(embed_frame(frame))
             if new_chunk_length >= CAPTION_AFTER_FRAMES:
-                batch = torch.stack(new_chunk_tokens).to('cuda')
+                batch = torch.stack(new_chunk_tokens).to(device)
                 embeds = clip_model.encode_image(batch)
                 embeds = torch.mean(embeds, dim=0)
 
@@ -209,10 +240,10 @@ def main():
                     if similarity > DRIFT_SIMILARITY_THRESHOLD:
                         caption = suggested_caption
                     else:
-                        caption = get_google_caption(embeds)
+                        caption = get_google_caption(frame)
 
                 else:
-                    caption = get_google_caption(embeds)
+                    caption = get_google_caption(frame)
 
                 begin_new_chunk = False
                 new_chunk_length = 0
