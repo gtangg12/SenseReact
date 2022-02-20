@@ -2,21 +2,21 @@
     Driver for translating video into captions
 """
 
-from torch import functional as F
 import sys
 import re
-sys.path.append('../../')
 import argparse
 import time
 import numpy as np
 import cv2
 import torch
 import torch.nn as nn
-from queue import Queue
-from drivers.perception.clip import clip
+from torch import functional as F
 from transformers import GPT2Tokenizer
-from kernel_util import *
 from PIL import Image
+from queue import Queue
+sys.path.append('../../')
+from kernel_util import *
+from drivers.perception.clip import clip
 from drivers.perception.MappingNet.model import ClipCaptionPrefix
 from drivers.perception.MappingNet.search import generate_beam
 
