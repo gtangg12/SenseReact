@@ -18,6 +18,10 @@ def perception_run():
 
         os.remove(filename)
 
+
+        """
+        DO YOUR COMPUTATION HERE
+        """
+
         with open(f'{out_dir}/{filename}', 'w') as fout:
             fout.write('AKSJGFHKJSAFGHJKFKASFGJ')
-        
