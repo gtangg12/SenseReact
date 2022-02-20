@@ -27,6 +27,7 @@ class PerceptionDriver:
     @classmethod
     def push(cls, caption):
         cls.buffer.put(caption)
+        print(caption)
 
     @classmethod
     def next(cls):
@@ -75,7 +76,8 @@ def embed_texts(texts):
 
 
 def embed_frame(frame):
-    tokens = clip_preprocess(frame)
+    image = Image.fromarray(frame)
+    tokens = clip_preprocess(image).unsqueeze(0).to(device)
     embeddings = clip_model.encode_image(tokens)
     return embeddings
 
@@ -166,7 +168,7 @@ def main():
     args = parse_args()
     load_clip()
 
-    video_cap = cv2.VideoCapture(0)
+    video_cap = cv2.VideoCapture('/nobackup/users/wzhao6/treehacks2022/sample_video.mp4')
     cap_prop = lambda x : int(video_cap.get(x))
 
     width, height = \
@@ -183,6 +185,9 @@ def main():
     new_chunk_length = 0
     new_chunk_tokens = []
 
+    load_clip()
+    load_unprompt()
+    print('Begin Reading From Camera')
     while True:
         success, frame = video_cap.read()
         if not success or len(frames) > args.num_frames - 1:
@@ -228,7 +233,8 @@ def main():
             a caption for the chunk.
             """
             new_chunk_length += 1
-            new_chunk_tokens.append(embed_frame(frame))
+            image = Image.fromarray(frame)
+            new_chunk_tokens.append(clip_preprocess(image))
             if new_chunk_length >= CAPTION_AFTER_FRAMES:
                 batch = torch.stack(new_chunk_tokens).to(device)
                 embeds = clip_model.encode_image(batch)
@@ -256,8 +262,8 @@ def main():
                 captions.append(caption)
 
 
-        if (cv2.waitKey(1) & 0xFF) == ord('q'):
-            break
+        #if (cv2.waitKey(1) & 0xFF) == ord('q'):
+        #    break
 
     print ("Recording time taken : {0} seconds".format(time.time() - start))
 
