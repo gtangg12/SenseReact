@@ -46,13 +46,8 @@ def execute(program):
 
 
 def exec_driver(name, method, *args):
-    print(args)
-    exit()
-    if len(args):
-        command = f'drivers[\'{name}\'].{method}({*args,})'
-    else:
-        command = f'drivers[\'{name}\'].{method}()'
-    return eval(command)
+    args = str(args).strip(')(')
+    return eval(f'drivers[\'{name}\'].{method}({args})')
 
 
 def exec_logic(name, inp):
