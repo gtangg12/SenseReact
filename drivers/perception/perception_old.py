@@ -17,7 +17,7 @@ from transformers import GPT2Tokenizer
 from PIL import Image
 sys.path.append('../../')
 from kernel_util import *
-from server import SERVER_DOCK
+from server_util import SERVER_DOCK
 from drivers.perception.clip import clip
 from drivers.perception.MappingNet.model import ClipCaptionPrefix
 from drivers.perception.MappingNet.search import generate_beam

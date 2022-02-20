@@ -8,13 +8,13 @@ respond:
     Instructions\:
 
     1) If someone falls, say "Hello do you need help!".
-    2) If is lying on the ground, say "Are you ok? Answer me or I am calling 911!".
+    2) If they are lying on the ground, say "Are you ok? Answer me or I am calling 911!".
     3) You can say possibly many things at a time depending on the situation.
 
 
 setup:
-    pipe_driver('camera', 'perception')
-    sync_driver('camera')
+    #pipe_driver('camera', 'perception')
+    #sync_driver('camera')
     sync_driver('perception')
 
 
@@ -22,3 +22,4 @@ loop:
     store('inp', exec_driver('perception', 'next'))
     store('out', exec_logic('respond', load('inp')))
     exec_driver('console', 'print', load('out'))
+    #exec_driver('speech', 'speak', load('out'))

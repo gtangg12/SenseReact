@@ -4,7 +4,7 @@
 import time
 from kernel_state import set_running_program, get_running_program
 from kernel_state import increment_clock_iteration, clock_frequency
-from kernel_util import drivers
+from kernel_util import *
 
 
 class Program:
@@ -36,7 +36,6 @@ def execute(program):
     program.states = {}
     set_running_program(program)
     running_program = get_running_program()
-    print(running_program, program)
     timer = time.time()
     while True:
         for line in running_program.loop:
@@ -55,15 +54,21 @@ def exec_driver(name, method, *args):
 def exec_logic(name, inp):
     running_program = get_running_program()
     prompt = running_program.prompts[name]
-    prompt += f'\n\nHuman: {inp}:'
-    '''
-    response = models['text_completion'].create(engine='text-davinci-001',
-                                                prompt=prompt,
-                                                temperature=0.3,
-                                                max_tokens=512)
-    text = get_response_text(response)
-    '''
+    prompt += f'\n\nHuman: {inp}\n'
 
+    response = openai.Completion.create(
+        engine="text-davinci-001",
+        prompt=prompt,
+        temperature=0,
+        max_tokens=150,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0.6,
+        stop=[" Human:", " AI:"]
+    )
+    text = get_response_text(response)
+
+    '''
 
     text = """The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.
 Given the scenario description, the assistant will do as the instructions say.
@@ -78,13 +83,19 @@ Human: One man is dying.
 AI: Someone get an AED. Someone start CPR! Someone pray healthcare is cheap!
 Human:
 """
-
-
-    start_sequence = "\nAI: "
+    '''
+    start_sequence = "\nAssistant:"
     restart_sequence = "\nHuman:"
-    start = text.rfind(start_sequence) + len(start_sequence)
+    start = text.rfind(start_sequence)
+    if start == -1:
+        start_sequence = "\nAI:"
+        start = text.rfind(start_sequence)
+    start += len(start_sequence)
     end = text.rfind(restart_sequence)
-    output = text[start:end]
+    output = text[start:end].strip('\n\t ')
+    print(prompt)
+    print(output)
+
     return output
 
 

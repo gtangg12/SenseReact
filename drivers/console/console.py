@@ -11,7 +11,7 @@ class ConsoleDriver:
 
     @classmethod
     def print(cls, output):
-        print("Console print: ", len(cls.pipe), output)
+        print("Console print: ", output)
         time.sleep(1)
 
     @classmethod

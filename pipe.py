@@ -5,7 +5,7 @@ import torch
 from queue import Queue
 from paramiko.client import SSHClient
 from dotenv import load_dotenv
-from server.server import SERVER_DOCK
+from server_util import SERVER_DOCK
 
 
 LOCAL_DOCK = 'dock'
@@ -32,17 +32,25 @@ class RemoteQueue():
         self.recv_dir = f'{SERVER_DOCK}/{name}_out'
 
     def put(self, client_path):
-        remote_client_path = f'{self.send_dir}/{filename}'
+        filename = client_path.split('/')[1]
+        remote_client_path = f'{remote_base_dir}/{self.send_dir}/{filename}'
         remote_client.put(client_path, remote_client_path)
         os.remove(client_path)
 
     def get(self, client_path):
+        return
+        """ DEADLOCK """
         remote_recv_dir = f'{remote_base_dir}/{self.recv_dir}'
+        print(remote_recv_dir)
+        print(remote_client.listdir(remote_recv_dir))
+        return
         filenames = sorted(remote_client.listdir(remote_recv_dir))
-        filenames = []
+        print(filenames)
+        return
         if len(filenames) == 0:
             return False
         filename = filenames[0]
+        print(filename)
         remote_client_path = f'{remote_recv_dir}/{filename}'
         remote_client.get(remote_client_path, client_path)
         remote_client.remove(remote_client_path)

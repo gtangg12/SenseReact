@@ -14,6 +14,7 @@ Usage:
 
 models = {
     'text_completion': openai.Completion,
+    #'chat': openai.Chat,
 }
 
 

@@ -41,8 +41,11 @@ def start_record(driver_cls):
         '''
         pipe.put(torch.from_numpy(frame))
         '''
-        client_path = f'perception_{timestamp_name()}.txt'
-        torch.save(torch.from_numpy(frame), client_path)
+        tensor = torch.from_numpy(frame)
+        client_path = f'dock/perception_{timestamp_name()}.pt'
+        torch.save(torch.tensor([1, 2, 3, 4]), client_path)
+        #tensor = torch.load(client_path)
+        #print(tensor.shape)
         pipe.put(client_path)
 
 
