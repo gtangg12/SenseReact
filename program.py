@@ -1,8 +1,9 @@
 """
-    N Programming Language Parser
+    N Programming Language Parser and Processes
 """
-
 import time
+from kernel_state import set_running_program, get_running_program
+from kernel_state import increment_clock_iteration, clock_frequency
 from kernel_util import drivers
 
 
@@ -12,37 +13,38 @@ class Program:
         self.compiled = False
 
 
-running_program = None
-clock_frequency = 0.1
-clock_iteration = 0
+def sync_driver(name):
+    drivers[name].sync()
+
+
+def pipe_driver(name1, name2):
+    drivers[name1].pipe = drivers[name2].pipe
 
 
 def load(var):
+    running_program = get_running_program()
     return running_program.states[var]
 
 
 def store(var, value):
+    running_program = get_running_program()
     running_program.states[var] = value
-
-
-def set_clock_frequency(frequency):
-    global clock_frequency
-    clock_frequency = frequency
 
 
 def execute(program):
     assert program.compiled, "Program is not compiled."
-    global running_program, clock_frequency, clock_iteration
     program.states = {}
-    running_program = program
+    set_running_program(program)
+    running_program = get_running_program()
+    print(running_program, program)
     timer = time.time()
     while True:
         for line in running_program.loop:
             eval(line)
+            increment_clock_iteration()
         while (time.time() - timer < 1.0 / clock_frequency):
             pass
         timer = time.time()
-        clock_iteration += 1
 
 
 def exec_driver(name, method, *args):
@@ -51,6 +53,7 @@ def exec_driver(name, method, *args):
 
 
 def exec_logic(name, inp):
+    running_program = get_running_program()
     prompt = running_program.prompts[name]
     prompt += f'\n\nHuman: {inp}:'
     '''
@@ -99,8 +102,9 @@ def compile(program):
     prompts, prompt_name = {}, None
 
     for line in lines:
-        if not prompt_name and line == '':
+        if not prompt_name and line == '' or len(line) > 0 and line[0] == '#':
             continue
+
         if line in ['logic:', 'setup:', 'loop:']:
             mode = line
             if mode == 'setup:':

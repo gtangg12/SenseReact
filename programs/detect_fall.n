@@ -7,17 +7,15 @@ respond:
 
     Instructions\:
 
-    1) If people are fighting, say "If you don't stop, I will call the police!".
-    2) If one side is hurt, say "I am calling 911!".
-    3) If one side is dying, say "Someone get an AED. Someone start CPR! Someone pray healthcare is cheap!".
-    4) You can say possibly many things at once.
-
-fuse:
-
+    1) If someone falls, say "Hello do you need help!".
+    2) If is lying on the ground, say "Are you ok? Answer me or I am calling 911!".
+    3) You can say possibly many things at a time depending on the situation.
 
 
 setup:
-    set_clock_frequency(10)
+    pipe_driver('camera', 'perception')
+    sync_driver('camera')
+    sync_driver('perception')
 
 
 loop:

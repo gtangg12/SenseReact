@@ -1,5 +1,7 @@
 """
     Driver for translating video into captions
+
+    Server side driver workhorse
 """
 
 import sys
@@ -13,29 +15,16 @@ import torch.nn as nn
 from torch import functional as F
 from transformers import GPT2Tokenizer
 from PIL import Image
-from queue import Queue
 sys.path.append('../../')
 from kernel_util import *
+from server import SERVER_DOCK
 from drivers.perception.clip import clip
 from drivers.perception.MappingNet.model import ClipCaptionPrefix
 from drivers.perception.MappingNet.search import generate_beam
 
 
-class PerceptionDriver:
-    buffer = Queue()
-
-    @classmethod
-    def push(cls, caption):
-        cls.buffer.put(caption)
-
-    @classmethod
-    def next(cls):
-        return 'tmp'
-        #return cls.buffer.get(block=True)
-
-    @classmethod
-    def reset(cls):
-        cls.buffer = Queue()
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = torch.device(device)
 
 
 READ_EVERY = 5
@@ -44,20 +33,19 @@ MAX_CHUNK_FRAMES = 300
 DRIFT_SIMILARITY_THRESHOLD = 0.5
 NEW_CHUNK_SIMILARITY_THRESHOLD = 0.5
 UNPROMPT_PREFIX_LENGTH = 40
-device='cuda'
 
 
 captions = ['The man is having a picnic in the park with his dog.']
 clip_model, clip_preprocess = None, None
-
-
 clip_model_unprompt, clip_preprocess_unprompt = None, None
 tokenizer_unprompt = None
 mapping_net_unprompt = None
 
+
 def load_clip():
     global clip_model, clip_preprocess
     clip_model, clip_preprocess = clip.load("ViT-L/14", device=device)
+
 
 def load_unprompt():
     global tokenizer_unprompt, mapping_net_unprompt, clip_model_unprompt, clip_preprocess_unprompt
@@ -134,7 +122,7 @@ def next_caption(clip_embedding):
     return candidates[topidx], scores[topidx]
 
 
-def get_google_caption(frame):
+def base_caption(frame):
     image = Image.fromarray(frame)
     image = clip_preprocess_unprompt(image).unsqueeze(0).to(device)
     with torch.no_grad():
@@ -146,36 +134,15 @@ def get_google_caption(frame):
     return generated_text_prefix
 
 
-
 def clean_caption():
     pass
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description='Recording settings.')
-
-    parser.add_argument('-o', '--output_path', default='output.mp4', type=str,
-        help='')
-    parser.add_argument('-n', '--num_frames', default=2000, type=int,
-        help='')
-    parser.add_argument('--fps', default=24, type=int,
-        help='')
-
-    return parser.parse_args()
-
 def main():
-    args = parse_args()
     load_clip()
 
-    video_cap = cv2.VideoCapture(0)
-    cap_prop = lambda x : int(video_cap.get(x))
-
-    width, height = \
-        cap_prop(cv2.CAP_PROP_FRAME_WIDTH), cap_prop(cv2.CAP_PROP_FRAME_HEIGHT)
-    print("Camera dimensions: {}x{}".format(height, width))
-
-    start = time.time()
-    frames = []
+    inp_dir = f'{SERVER_DOCK}/perception_inp'
+    out_dir = f'{SERVER_DOCK}/perception_out'
 
     last_segment_length = 0
     last_segment_caption_embedding = None
@@ -185,10 +152,8 @@ def main():
     new_chunk_tokens = []
 
     while True:
-        success, frame = video_cap.read()
-        if not success or len(frames) > args.num_frames - 1:
-            break
-
+        filename = sorted(os.listdir(inp_dir))[0]
+        frame = torch.load(filename)
 
         """
         Assume we're not currently beginning a new chunk.
@@ -217,7 +182,6 @@ def main():
                 if similarity < NEW_CHUNK_SIMILARITY_THRESHOLD:
                     begin_new_chunk = False
                     last_segment_length += READ_EVERY
-
                 else:
                     begin_new_chunk = True
 
@@ -242,10 +206,10 @@ def main():
                     if similarity > DRIFT_SIMILARITY_THRESHOLD:
                         caption = suggested_caption
                     else:
-                        caption = get_google_caption(frame)
+                        caption = base_caption(frame)
 
                 else:
-                    caption = get_google_caption(frame)
+                    caption = base_caption(frame)
 
                 begin_new_chunk = False
                 new_chunk_length = 0
@@ -253,14 +217,11 @@ def main():
                 sampling_counter = 0
                 last_segment_length = CAPTION_AFTER_FRAMES
                 last_segment_caption_embedding = clip_model.encode_text(caption)
-                PerceptionDriver.push(caption)
                 captions.append(caption)
 
-
-        if (cv2.waitKey(1) & 0xFF) == ord('q'):
-            break
-
-    print ("Recording time taken : {0} seconds".format(time.time() - start))
+                filename = f'{time.time()}.txt'
+                with open(f'{out_dir}/{filename}', 'w') as fout:
+                    fout.write(caption)
 
 
 if __name__ == '__main__':
