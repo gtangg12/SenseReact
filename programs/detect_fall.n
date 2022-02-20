@@ -13,8 +13,8 @@ respond:
 
 
 setup:
-    #pipe_driver('camera', 'perception')
-    #sync_driver('camera')
+    pipe_driver('camera', 'perception')
+    sync_driver('camera')
     sync_driver('perception')
 
 

@@ -1,0 +1,107 @@
+gtangg12@dhcp-10-31-59-219 SenseReact % python3 kernel.py
+7.295608520507812e-05
+Camera dimensions: 720x1280
+The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.
+
+Given the scenario description, the assistant will do as the instructions say.
+
+Instructions:
+
+1) If someone falls, say "Hello do you need help!".
+2) If they are lying on the ground, say "Are you ok? Answer me or I am calling 911!".
+3) You can say possibly many things at a time depending on the situation.
+
+Human: It is a nice day
+
+It sure is! The sun is shining and the birds are singing. It's a perfect day for a walk
+Console print:  It sure is! The sun is shining and the birds are singing. It's a perfect day for a walk
+1.920832872390747
+The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.
+
+Given the scenario description, the assistant will do as the instructions say.
+
+Instructions:
+
+1) If someone falls, say "Hello do you need help!".
+2) If they are lying on the ground, say "Are you ok? Answer me or I am calling 911!".
+3) You can say possibly many things at a time depending on the situation.
+
+Human: It is a nice day. A man is walking towards a wall.
+
+Hello do you need help
+Console print:  Hello do you need help
+3.2780771255493164
+The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.
+
+Given the scenario description, the assistant will do as the instructions say.
+
+Instructions:
+
+1) If someone falls, say "Hello do you need help!".
+2) If they are lying on the ground, say "Are you ok? Answer me or I am calling 911!".
+3) You can say possibly many things at a time depending on the situation.
+
+Human: It is a nice day. A man is walking towards a wall.. A man is walking towards a wall.
+
+Yes, it is a nice day. Be careful though, you don't want to fall and hurt yourself
+Console print:  Yes, it is a nice day. Be careful though, you don't want to fall and hurt yourself
+4.990355014801025
+The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.
+
+Given the scenario description, the assistant will do as the instructions say.
+
+Instructions:
+
+1) If someone falls, say "Hello do you need help!".
+2) If they are lying on the ground, say "Are you ok? Answer me or I am calling 911!".
+3) You can say possibly many things at a time depending on the situation.
+
+Human: It is a nice day. A man is walking towards a wall.. A man is walking towards a wall.. He bumps into the wall.
+
+Hello do you need help
+Console print:  Hello do you need help
+6.6131768226623535
+The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.
+
+Given the scenario description, the assistant will do as the instructions say.
+
+Instructions:
+
+1) If someone falls, say "Hello do you need help!".
+2) If they are lying on the ground, say "Are you ok? Answer me or I am calling 911!".
+3) You can say possibly many things at a time depending on the situation.
+
+Human: It is a nice day. A man is walking towards a wall.. A man is walking towards a wall.. He bumps into the wall.. He falls down.
+
+Hello do you need help
+Console print:  Hello do you need help
+8.138433933258057
+The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.
+
+Given the scenario description, the assistant will do as the instructions say.
+
+Instructions:
+
+1) If someone falls, say "Hello do you need help!".
+2) If they are lying on the ground, say "Are you ok? Answer me or I am calling 911!".
+3) You can say possibly many things at a time depending on the situation.
+
+Human: It is a nice day. A man is walking towards a wall.. A man is walking towards a wall.. He bumps into the wall.. He falls down.. He falls down again.
+
+Hello do you need help? Are you ok? Answer me or I am calling 911
+Console print:  Hello do you need help? Are you ok? Answer me or I am calling 911
+9.872204780578613
+The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.
+
+Given the scenario description, the assistant will do as the instructions say.
+
+Instructions:
+
+1) If someone falls, say "Hello do you need help!".
+2) If they are lying on the ground, say "Are you ok? Answer me or I am calling 911!".
+3) You can say possibly many things at a time depending on the situation.
+
+Human: It is a nice day. A man is walking towards a wall.. A man is walking towards a wall.. He bumps into the wall.. He falls down.. He falls down again.. He seems to be very hurt lying on the floor.
+
+Hello do you need help? Are you ok? Answer me or I am calling 911
+Console print:  Hello do you need help? Are you ok? Answer me or I am calling 911

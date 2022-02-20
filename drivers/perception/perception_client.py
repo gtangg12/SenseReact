@@ -11,9 +11,15 @@ from pipe import RemoteTunnel, timestamp_name
 class PerceptionDriver:
     pipe = RemoteTunnel('perception')
 
-    captions = ['A man is flying a kite', 'The kite blows in the air', 'A child nearby noticies the kite', 'He jumps for the kite but slips', 'He falls down',
-    'Another man walks past', 'He sees the child', 'He looks at the child who seems hurt', 'He runs to the child who lies dying on the ground', 'He trips and falls']
-    timestamps = [0, 3, 6, 10, 12, 15, 17, 19, 20, 25]
+    captions = [
+        'It is a nice day',
+        'A man is walking towards a wall.',
+        'A man is walking towards a wall.',
+        'He bumps into the wall.',
+        'He falls down.',
+        'He falls down again.',
+        'He seems to be very hurt lying on the floor.']
+    timestamps = [0, 14/30, 59/30, 83/30, 97/30, 111/30, 5]
     timer = None
     cnt = 0
 

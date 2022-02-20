@@ -1,0 +1,24 @@
+logic:
+
+guard:
+    The following is a conversation with an AI assistant. The assistant is stern, disciplined, and strict.
+
+    Given the scenario description, the assistant will do as the instructions say.
+
+    Instructions:
+
+    1) If anyone approaches you, be nice.
+    2) Do not let anyone provoke you.
+    3) If someone tries to walk past you, dial 911.
+
+
+setup:
+    pipe_driver('camera', 'perception')
+    sync_driver('camera')
+    sync_driver('perception')
+
+loop:
+    store('inp', exec_driver('perception', 'next'))
+    store('out', exec_logic('guard', load('inp')))
+    # console could be an automatic interface that dials 911
+    exec_driver('console', 'print', load('out'))
