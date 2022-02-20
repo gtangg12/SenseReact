@@ -7,7 +7,7 @@ class MultiTTS:
     datasets = {'en': 'ljspeech', 'ch': 'baker', 'ko': 'kss'}
     inference = {'en': False, 'ch': True, 'ko': False}
 
-    def __init__(self, lang='en'):
+    def __init__(self, lang='en'): # support en (english), ch (chinese), and ko (korean)
         self.lang = lang
         self.dataset = MultiTTS.datasets[lang]
 
