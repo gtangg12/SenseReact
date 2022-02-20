@@ -5,7 +5,7 @@ respond:
 
     Given the scenario description, the assistant will do as the instructions say.
 
-    Instructions:
+    Instructions\:
 
     1) If people are fighting, say "If you don't stop, I will call the police!".
     2) If one side is hurt, say "I am calling 911!".
@@ -17,7 +17,7 @@ fuse:
 
 
 setup:
-    set_frequency(10)
+    set_clock_frequency(10)
 
 
 loop:

@@ -21,16 +21,15 @@ class PerceptionDriver:
 
     @classmethod
     def push(cls, caption):
-        PerceptionDriver.buffer.put(caption)
+        cls.buffer.put(caption)
 
     @classmethod
     def next(cls):
-        return 'tmp'
-        #return PerceptionDriver.buffer.get(block=True)
+        return cls.buffer.get(block=True)
 
     @classmethod
     def reset(cls):
-        PerceptionDriver.buffer = Queue()
+        cls.buffer = Queue()
 
 
 READ_EVERY = 5
