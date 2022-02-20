@@ -29,7 +29,8 @@ class PerceptionDriver:
 
     @classmethod
     def next(cls):
-        return cls.buffer.get(block=True)
+        return 'tmp'
+        #return cls.buffer.get(block=True)
 
     @classmethod
     def reset(cls):
@@ -61,7 +62,7 @@ def load_unprompt():
     global tokenizer_unprompt, mapping_net_unprompt, clip_model_unprompt, clip_preprocess_unprompt
     tokenizer_unprompt = GPT2Tokenizer.from_pretrained("gpt2")
     clip_model_unprompt, clip_preprocess_unprompt = clip.load("RN50x4", device=device, jit=False)
-    
+
     model_path = './MappingNet/pretrained_models/model_wieghts.pt'
     mapping_net_unprompt = ClipCaptionPrefix(UNPROMPT_PREFIX_LENGTH, clip_length=40, prefix_size=640,
                                     num_layers=8, mapping_type='transformer')

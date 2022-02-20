@@ -46,6 +46,8 @@ def execute(program):
 
 
 def exec_driver(name, method, *args):
+    print(args)
+    exit()
     if len(args):
         command = f'drivers[\'{name}\'].{method}({*args,})'
     else:
