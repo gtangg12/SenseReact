@@ -158,13 +158,9 @@ def next_caption(clip_embedding):
     return candidates[topidx], scores[topidx]
 
 
-<<<<<<< HEAD:drivers/perception/perception.py
-def get_google_caption(frame):
+def base_caption(frame):
     return "A man is walking towards a wall."
     """
-=======
-def base_caption(frame):
->>>>>>> 9e3d63198d43a37f79dbc912eacddc01b71ec2b2:drivers/perception/perception_old.py
     image = Image.fromarray(frame)
     image = clip_preprocess_unprompt(image).unsqueeze(0).to(clip_model_unprompt_device)
     with torch.no_grad():
