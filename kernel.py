@@ -1,9 +1,14 @@
-import argparse
-from process import Program, compile, execute
+import sys
+import atexit
+from program import Program, compile, execute
+from kernel_state import cleanup_threads
+
+
+atexit.register(cleanup_threads)
 
 
 def main():
-    program = Program('detect_fight')
+    program = Program('detect_fall')
     compile(program)
     execute(program)
 

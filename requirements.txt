@@ -1,2 +1,3 @@
 torch
 openai
+python-dotenv

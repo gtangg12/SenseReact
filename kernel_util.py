@@ -21,10 +21,12 @@ def get_response_text(response):
     return response['choices'][0]['text']
 
 
+from drivers.camera.camera import CameraDriver
 from drivers.console.console import ConsoleDriver
-from drivers.perception.perception import PerceptionDriver
+from drivers.perception.perception_client import PerceptionDriver
 
 drivers = {
+    'camera': CameraDriver,
     'console': ConsoleDriver,
-    'perception': PerceptionDriver
+    'perception': PerceptionDriver,
 }

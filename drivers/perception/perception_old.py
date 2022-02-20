@@ -1,5 +1,7 @@
 """
     Driver for translating video into captions
+
+    Server side driver workhorse
 """
 
 import sys
@@ -13,14 +15,15 @@ import torch.nn as nn
 from torch.nn import functional as F
 from transformers import GPT2Tokenizer
 from PIL import Image
-from queue import Queue
 sys.path.append('../../')
 from kernel_util import *
+from server import SERVER_DOCK
 from drivers.perception.clip import clip
 from drivers.perception.MappingNet.model import ClipCaptionPrefix
 from drivers.perception.MappingNet.search import generate_beam
 
 
+<<<<<<< HEAD:drivers/perception/perception.py
 class PerceptionDriver:
     buffer = Queue()
 
@@ -37,6 +40,10 @@ class PerceptionDriver:
     @classmethod
     def reset(cls):
         cls.buffer = Queue()
+=======
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = torch.device(device)
+>>>>>>> 9e3d63198d43a37f79dbc912eacddc01b71ec2b2:drivers/perception/perception_old.py
 
 
 READ_EVERY = 5
@@ -53,15 +60,15 @@ mapping_net_unprompt_device='cuda:2'
 
 captions = []#['The man is having a picnic in the park with his dog.']
 clip_model, clip_preprocess = None, None
-
-
 clip_model_unprompt, clip_preprocess_unprompt = None, None
 tokenizer_unprompt = None
 mapping_net_unprompt = None
 
+
 def load_clip():
     global clip_model, clip_preprocess
     clip_model, clip_preprocess = clip.load("ViT-L/14", device=clip_model_device)
+
 
 def load_unprompt():
     global tokenizer_unprompt, mapping_net_unprompt, clip_model_unprompt, clip_preprocess_unprompt
@@ -151,9 +158,13 @@ def next_caption(clip_embedding):
     return candidates[topidx], scores[topidx]
 
 
+<<<<<<< HEAD:drivers/perception/perception.py
 def get_google_caption(frame):
     return "A man is walking towards a wall."
     """
+=======
+def base_caption(frame):
+>>>>>>> 9e3d63198d43a37f79dbc912eacddc01b71ec2b2:drivers/perception/perception_old.py
     image = Image.fromarray(frame)
     image = clip_preprocess_unprompt(image).unsqueeze(0).to(clip_model_unprompt_device)
     with torch.no_grad():
@@ -166,27 +177,14 @@ def get_google_caption(frame):
     """
 
 
-
 def clean_caption():
     pass
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description='Recording settings.')
-
-    parser.add_argument('-o', '--output_path', default='output.mp4', type=str,
-        help='')
-    parser.add_argument('-n', '--num_frames', default=2000, type=int,
-        help='')
-    parser.add_argument('--fps', default=24, type=int,
-        help='')
-
-    return parser.parse_args()
-
 def main():
-    args = parse_args()
     load_clip()
 
+<<<<<<< HEAD:drivers/perception/perception.py
     video_cap = cv2.VideoCapture('/nobackup/users/wzhao6/treehacks2022/sample_video.mp4')
     cap_prop = lambda x : int(video_cap.get(x))
 
@@ -195,6 +193,10 @@ def main():
     print("Camera dimensions: {}x{}".format(height, width))
 
     frames = []
+=======
+    inp_dir = f'{SERVER_DOCK}/perception_inp'
+    out_dir = f'{SERVER_DOCK}/perception_out'
+>>>>>>> 9e3d63198d43a37f79dbc912eacddc01b71ec2b2:drivers/perception/perception_old.py
 
     last_segment_length = 0
     last_segment_caption_embedding = None
@@ -210,11 +212,16 @@ def main():
     start = time.time()
     print('Begin Reading From Camera')
     while True:
+<<<<<<< HEAD:drivers/perception/perception.py
         frame_counter += 1
         success, frame = video_cap.read()
         if not success or len(frames) > args.num_frames - 1:
             break
 
+=======
+        filename = sorted(os.listdir(inp_dir))[0]
+        frame = torch.load(filename)
+>>>>>>> 9e3d63198d43a37f79dbc912eacddc01b71ec2b2:drivers/perception/perception_old.py
 
         """
         Assume we're not currently beginning a new chunk.
@@ -223,6 +230,7 @@ def main():
         the last segment has lasted at least MAX_CHUNK_FRAMES, we start a new chunk.
         """
 
+<<<<<<< HEAD:drivers/perception/perception.py
         if not begin_new_chunk:
             sampling_counter += 1
             if sampling_counter % READ_EVERY == 0:
@@ -238,6 +246,29 @@ def main():
                 if last_segment_caption_embedding is None:
                     begin_new_chunk = True
                 elif last_segment_length > MAX_CHUNK_FRAMES:
+=======
+        sampling_counter += 1
+        if sampling_counter % READ_EVERY == 0:
+            sampling_counter = 0
+            embedding = embed_frame(frame)
+
+            """
+            Detect whether we should start a new chunk. There're 3 cases:
+                1. This is the first frame
+                2. The last segment has been long enough
+                3. The last segment's caption is too dissimilar to the current frame
+            """
+            if last_segment_caption_embedding is None:
+                begin_new_chunk = True
+            elif last_segment_length > MAX_CHUNK_FRAMES:
+                begin_new_chunk = True
+            else:
+                similarity = F.cosing_similarity(last_segment_caption_embedding, embedding)
+                if similarity < NEW_CHUNK_SIMILARITY_THRESHOLD:
+                    begin_new_chunk = False
+                    last_segment_length += READ_EVERY
+                else:
+>>>>>>> 9e3d63198d43a37f79dbc912eacddc01b71ec2b2:drivers/perception/perception_old.py
                     begin_new_chunk = True
                 else:
                     #print(last_segment_caption_embedding.shape, embedding.shape)
@@ -292,18 +323,26 @@ def main():
                         caption = suggested_caption
                         print("Using suggested caption: {}".format(caption))
                     else:
+<<<<<<< HEAD:drivers/perception/perception.py
                         caption = get_google_caption(frame)
                         print("Using google caption: {}".format(caption))
 
                 else:
                     caption = get_google_caption(frame)
                     print("Using google caption: {}".format(caption))
+=======
+                        caption = base_caption(frame)
+
+                else:
+                    caption = base_caption(frame)
+>>>>>>> 9e3d63198d43a37f79dbc912eacddc01b71ec2b2:drivers/perception/perception_old.py
 
                 begin_new_chunk = False
                 new_chunk_length = 0
                 new_chunk_tokens = []
                 sampling_counter = 0
                 last_segment_length = CAPTION_AFTER_FRAMES
+<<<<<<< HEAD:drivers/perception/perception.py
                 last_segment_caption_embedding = clip_model.encode_text(clip.tokenize([caption]).to(clip_model_device)).squeeze(0).float()
                 PerceptionDriver.push(caption)
                 print('new caption in frame', frame_counter)
@@ -314,6 +353,14 @@ def main():
         #    break
 
     print ("Recording time taken : {0} seconds".format(time.time() - start))
+=======
+                last_segment_caption_embedding = clip_model.encode_text(caption)
+                captions.append(caption)
+
+                filename = f'{time.time()}.txt'
+                with open(f'{out_dir}/{filename}', 'w') as fout:
+                    fout.write(caption)
+>>>>>>> 9e3d63198d43a37f79dbc912eacddc01b71ec2b2:drivers/perception/perception_old.py
 
 
 if __name__ == '__main__':
