@@ -2,8 +2,10 @@
     Driver for translating video into captions
 """
 
+from torch import functional as F
 import sys
 import re
+sys.path.append('../../')
 import argparse
 import time
 import numpy as np
@@ -11,9 +13,8 @@ import cv2
 import torch
 import torch.nn as nn
 from queue import Queue
-from drivers.perception.CLIP import clip
+from drivers.perception.clip import clip
 from transformers import GPT2Tokenizer
-sys.path.append('../../')
 from kernel_util import *
 from PIL import Image
 from drivers.perception.MappingNet.model import ClipCaptionPrefix
