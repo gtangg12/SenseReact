@@ -1,5 +1,7 @@
 # SenseReact
 
+https://docs.google.com/presentation/d/1PowXbtupLHRTF7QQqd7PE_aklRdRY9yn_GDUYLoicRE/edit?usp=sharing
+
 ## How to use satori
 To use drag and drop file transfer: access filesystem at https://satori-portal.mit.edu/
 
